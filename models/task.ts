@@ -1,9 +1,9 @@
 export class Task {
     constructor(
-        private ID: string,
-        private title:string,
-        private description: string,
-        private creation:string,
-        private completed: boolean = false
+        readonly ID: string,
+        readonly title:string,
+        readonly description: string,
+        readonly creation:string,
+        readonly completed: boolean = false
     ){}
 }
