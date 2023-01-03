@@ -1,12 +1,14 @@
 import { ApolloClient, gql, InMemoryCache } from '@apollo/client'
 import { GetServerSidePropsContext } from 'next'
-
+import {useRouter} from 'next/router'
 import Taskcomponent from '../components/Task'
 import { Task } from '../models'
 
 export default function Home({ data }: any) {
+  const router = useRouter()
   return (
     <>
+      <button className='btn btn-outline-secondary' onClick={()=>router.push('/new')}>Nova Tarefa</button>
       <section className='home'>
         {
           data.map((e: Task, index:number) => (<>
