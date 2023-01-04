@@ -2,6 +2,7 @@ import { ApolloClient, gql, InMemoryCache } from '@apollo/client'
 import { GetServerSidePropsContext } from 'next'
 import { useRouter } from 'next/router'
 import Taskcomponent from '../components/Task'
+import { ListTasks } from '../graphql'
 import { Task } from '../models'
 
 export default function Home({ data }: any) {
@@ -27,15 +28,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     ssrMode: true
   })
   const { data: { listTasks } } = await client.query({
-    query: gql`query listTasks{
-      listTasks{
-          ID
-          title
-          completed
-          description
-          creation
-      }
-  }`,
+    query: ListTasks,
   })
   return {
     props: {
