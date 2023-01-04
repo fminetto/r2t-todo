@@ -1,15 +1,15 @@
 import { InMemoryCache, useApolloClient } from "@apollo/client";
 import { useRouter } from "next/router";
 import { FormEvent, FormEventHandler, useCallback, useState } from "react";
-import { CreateTask, UpdateTask } from "../../graphql";
+import { CreateTask, DeleteTask, UpdateTask } from "../../graphql";
 
 import { Task } from "../../models";
 
 export default function Taskcomponent(task?: Task) {
     const client = useApolloClient()
     const router = useRouter()
-    const createTask = useCallback((task: Task) => {
-        client.mutate({
+    const createTask = useCallback(async(task: Task) => {
+        await client.mutate({
             mutation: CreateTask,
             variables: {
                 task: {
@@ -21,9 +21,9 @@ export default function Taskcomponent(task?: Task) {
         })
     }, [client]);
 
-    const updateTask = useCallback((task: Task) => {
+    const updateTask = useCallback(async(task: Task) => {
         debugger
-        client.mutate({
+        await client.mutate({
             mutation: UpdateTask,
             variables: {
                 taskId: task.ID,
@@ -35,6 +35,16 @@ export default function Taskcomponent(task?: Task) {
             }
         })
     }, [client]);
+
+    const deleteTask = useCallback(async() => {
+        debugger
+        await client.mutate({
+            mutation: DeleteTask,
+            variables: {
+                taskId: task?.ID
+            }
+        })
+    }, [client, task?.ID]);
 
     const onSubmit = useCallback((event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -50,7 +60,10 @@ export default function Taskcomponent(task?: Task) {
                 description,
                 "",
                 completed
-            ))
+            )).then(()=>{
+                debugger
+                router.reload()
+            })
         } else {
             createTask(new Task(
                 "",
@@ -58,8 +71,9 @@ export default function Taskcomponent(task?: Task) {
                 description,
                 "",
                 completed
-            ))
-            router.push('/')
+            )).then(()=>{
+                router.push('/')
+            })
         }
         return false;
     }, [createTask, router, task?.ID, updateTask])
@@ -69,11 +83,11 @@ export default function Taskcomponent(task?: Task) {
         <input className="card-title" type='text' name="title" defaultValue={task?.title || "Nova Tarefa"} />
         <textarea className="card-text" name="description" defaultValue={task?.description || "Descrição"} ></textarea>
         <div className="card-body">
-            <input type="checkbox" name="completed" defaultChecked={task?.completed} id="completed" />
-            <label htmlFor="completed">Completar tarefa</label>
+            <input type="checkbox" name="completed" defaultChecked={task?.completed} id={`completed${task?.ID}`} />
+            <label htmlFor={`completed${task?.ID}`}>Completar tarefa</label>
         </div>
         <div className="btn-group" role="group">
-            <button className="btn btn-outline-danger">Apagar</button>
+            {!!task?.ID && <button onClick={deleteTask} className="btn btn-outline-danger">Apagar</button>}
             <input type='submit' className="btn btn-outline-primary" value="Salvar" />
         </div>
     </form>
