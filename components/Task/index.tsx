@@ -83,7 +83,7 @@ export default function Taskcomponent(task?: Task) {
             <input type="checkbox" name="completed" id={`completed${task?.ID}`} defaultChecked={task?.completed} />
             <input type='text' name='title' className="task-title" defaultValue={task?.title} />
             <div className="btn-group" role='group'>
-                <button className="btn btn-outline-primary"><i className="bi bi-save"></i></button>
+                <button className="btn btn-outline-primary"><i className="bi bi-arrow-down-up"></i></button>
                 {
                     !!task?.ID &&
                     <button className="btn btn-outline-danger" onClick={deleteTask}><i className="bi bi-trash2"></i></button>
