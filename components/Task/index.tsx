@@ -1,14 +1,16 @@
-import { InMemoryCache, useApolloClient } from "@apollo/client";
+import { useApolloClient } from "@apollo/client";
 import { useRouter } from "next/router";
-import { FormEvent, FormEventHandler, useCallback, useState } from "react";
-import { CreateTask, DeleteTask, UpdateTask } from "../../graphql";
+import { FormEvent, useCallback } from "react";
 
+import { CreateTask, DeleteTask, UpdateTask } from "../../graphql";
 import { Task } from "../../models";
+
+import '../../styles/TaskItem.module.css'
 
 export default function Taskcomponent(task?: Task) {
     const client = useApolloClient()
     const router = useRouter()
-    const createTask = useCallback(async(task: Task) => {
+    const createTask = useCallback(async (task: Task) => {
         await client.mutate({
             mutation: CreateTask,
             variables: {
@@ -21,7 +23,7 @@ export default function Taskcomponent(task?: Task) {
         })
     }, [client]);
 
-    const updateTask = useCallback(async(task: Task) => {
+    const updateTask = useCallback(async (task: Task) => {
         debugger
         await client.mutate({
             mutation: UpdateTask,
@@ -36,7 +38,7 @@ export default function Taskcomponent(task?: Task) {
         })
     }, [client]);
 
-    const deleteTask = useCallback(async() => {
+    const deleteTask = useCallback(async () => {
         debugger
         await client.mutate({
             mutation: DeleteTask,
@@ -50,45 +52,43 @@ export default function Taskcomponent(task?: Task) {
         event.preventDefault();
         const elements = event.currentTarget.elements;
         const title = (elements.namedItem('title') as HTMLInputElement).value
-        const description = (elements.namedItem('description') as HTMLInputElement).value
         const completed = (elements.namedItem('completed') as HTMLInputElement).checked
-        debugger
         if (!!task?.ID) {
             updateTask(new Task(
                 task.ID,
                 title,
-                description,
+                "",
                 "",
                 completed
-            )).then(()=>{
-                debugger
+            )).then(() => {
                 router.reload()
             })
         } else {
             createTask(new Task(
                 "",
                 title,
-                description,
+                "",
                 "",
                 completed
-            )).then(()=>{
-                router.push('/')
+            )).then(() => {
+                router.reload()
             })
         }
         return false;
     }, [createTask, router, task?.ID, updateTask])
 
 
-    return <form onSubmit={onSubmit} className="card">
-        <input className="card-title" type='text' name="title" defaultValue={task?.title || "Nova Tarefa"} />
-        <textarea className="card-text" name="description" defaultValue={task?.description || "Descrição"} ></textarea>
-        <div className="card-body">
-            <input type="checkbox" name="completed" defaultChecked={task?.completed} id={`completed${task?.ID}`} />
-            <label htmlFor={`completed${task?.ID}`}>Completar tarefa</label>
-        </div>
-        <div className="btn-group" role="group">
-            {!!task?.ID && <button onClick={deleteTask} className="btn btn-outline-danger">Apagar</button>}
-            <input type='submit' className="btn btn-outline-primary" value="Salvar" />
-        </div>
-    </form>
+    return <li className="list-group-item">
+        <form onSubmit={onSubmit}>
+            <input type="checkbox" name="completed" id={`completed${task?.ID}`} defaultChecked={task?.completed} />
+            <input type='text' name='title' className="task-title" defaultValue={task?.title} />
+            <div className="btn-group" role='group'>
+                <button className="btn btn-outline-primary"><i className="bi bi-save"></i></button>
+                {
+                    !!task?.ID &&
+                    <button className="btn btn-outline-danger" onClick={deleteTask}><i className="bi bi-trash2"></i></button>
+                }
+            </div>
+        </form>
+    </li>
 }

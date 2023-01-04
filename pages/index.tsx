@@ -1,22 +1,35 @@
-import { ApolloClient, gql, InMemoryCache } from '@apollo/client'
+import { ApolloClient, InMemoryCache } from '@apollo/client'
 import { GetServerSidePropsContext } from 'next'
-import { useRouter } from 'next/router'
+import { useCallback, useState } from 'react'
+
 import Taskcomponent from '../components/Task'
 import { ListTasks } from '../graphql'
 import { Task } from '../models'
 
 export default function Home({ data }: any) {
-  const router = useRouter()
+  const [tasks, setTasks] = useState<Task[]>(data)
+  const addTask = useCallback(() => {
+    debugger
+    const tmpTasks = Array.from(tasks);
+    tmpTasks.push(new Task(
+      "",
+      "Nova Tarefa",
+      "",
+      "",
+      false
+    ))
+    setTasks(tmpTasks)
+  }, [tasks]);
   return (
     <>
-      <button className='btn btn-outline-secondary' onClick={() => router.push('/new')}>Nova Tarefa</button>
-      <section className='home'>
+      <ul className='list-group'>
         {
-          data.map((e: Task, index: number) => (<>
+          tasks.map((e: Task, index: number) => (<>
             <Taskcomponent ID={e.ID} completed={e.completed} creation={e.creation} description={e.description} title={e.title} key={index} />
           </>))
         }
-      </section>
+      </ul>
+      <button className="btn btn-outline-secondary" onClick={addTask}><i className="bi bi-plus-lg"></i></button>
     </>
   )
 }
