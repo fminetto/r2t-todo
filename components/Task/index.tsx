@@ -1,7 +1,7 @@
 import { InMemoryCache, useApolloClient } from "@apollo/client";
 import { useRouter } from "next/router";
 import { FormEvent, FormEventHandler, useCallback, useState } from "react";
-import { CreateTask } from "../../graphql";
+import { CreateTask, UpdateTask } from "../../graphql";
 
 import { Task } from "../../models";
 
@@ -9,10 +9,24 @@ export default function Taskcomponent(task?: Task) {
     const client = useApolloClient()
     const router = useRouter()
     const createTask = useCallback((task: Task) => {
-        debugger
         client.mutate({
             mutation: CreateTask,
             variables: {
+                task: {
+                    title: task.title,
+                    description: task.description,
+                    completed: task.completed
+                }
+            }
+        })
+    }, [client]);
+
+    const updateTask = useCallback((task: Task) => {
+        debugger
+        client.mutate({
+            mutation: UpdateTask,
+            variables: {
+                taskId: task.ID,
                 task: {
                     title: task.title,
                     description: task.description,
@@ -30,19 +44,25 @@ export default function Taskcomponent(task?: Task) {
         const completed = (elements.namedItem('completed') as HTMLInputElement).checked
         debugger
         if (!!task?.ID) {
+            updateTask(new Task(
+                task.ID,
+                title,
+                description,
+                "",
+                completed
+            ))
         } else {
-            const task = new Task(
+            createTask(new Task(
                 "",
                 title,
                 description,
                 "",
                 completed
-            )
-            createTask(task)
+            ))
             router.push('/')
         }
         return false;
-    }, [createTask, router, task?.ID])
+    }, [createTask, router, task?.ID, updateTask])
 
 
     return <form onSubmit={onSubmit} className="card">
