@@ -1,30 +1,34 @@
-import { ApolloClient, InMemoryCache } from '@apollo/client'
+import { ApolloClient, InMemoryCache, useApolloClient } from '@apollo/client'
 import { GetServerSidePropsContext } from 'next'
-import { useCallback, useState } from 'react'
+import { useRouter } from 'next/router'
+import { useCallback } from 'react'
 
 import Taskcomponent from '../components/Task'
-import { ListTasks } from '../graphql'
+import { CreateTask, ListTasks } from '../graphql'
 import { Task } from '../models'
 
 export default function Home({ data }: any) {
-  const [tasks, setTasks] = useState<Task[]>(data)
+  const client = useApolloClient();
+  const router = useRouter();
   const addTask = useCallback(() => {
-    debugger
-    const tmpTasks = Array.from(tasks);
-    tmpTasks.push(new Task(
-      "",
-      "Nova Tarefa",
-      "",
-      "",
-      false
-    ))
-    setTasks(tmpTasks)
-  }, [tasks]);
+    client.mutate({
+      mutation: CreateTask,
+      variables: {
+        task: {
+          title: 'Nova Tarefa',
+          description: '',
+          completed: false
+        }
+      }
+    }).finally(() => {
+      router.reload()
+    })
+  }, [client, router]);
   return (
     <>
       <ul className='list-group'>
         {
-          tasks.map((e: Task, index: number) => (<>
+          data.map((e: Task, index: number) => (<>
             <Taskcomponent ID={e.ID} completed={e.completed} creation={e.creation} description={e.description} title={e.title} key={index} />
           </>))
         }
